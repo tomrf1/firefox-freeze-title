@@ -4,6 +4,14 @@
   "version": "1.0",
   "description": "Prevents tab titles from updating",
   "permissions": ["menus", "tabs"],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@freeze-title",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "background": {
     "scripts": ["background.js"]
   },
