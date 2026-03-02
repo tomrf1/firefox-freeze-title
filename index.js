@@ -2,6 +2,8 @@ class FrozenState {
   frozenTitle = document.title;
   originalTitleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'title');
   titleObserver;
+  faviconObserver;
+  frozenFaviconHref;
 
   constructor() {
     // Prevent JS updates to document.title
@@ -21,11 +23,26 @@ class FrozenState {
       });
       this.titleObserver.observe(titleElement, { childList: true, characterData: true, subtree: true });
     }
+
+    // Prevent updates to favicon
+    const faviconElement = document.querySelector('link[rel~="icon"]');
+    this.frozenFaviconHref = faviconElement?.href ?? null;
+
+    this.faviconObserver = new MutationObserver(() => {
+      document.querySelectorAll('link[rel~="icon"]').forEach(el => {
+        if (el.href !== this.frozenFaviconHref) {
+          el.href = this.frozenFaviconHref;
+        }
+      });
+    });
+    this.faviconObserver.observe(document.head, { childList: true, attributes: true, attributeFilter: ['href'], subtree: false });
   }
+
 
   unfreeze() {
     Object.defineProperty(document, 'title', this.originalTitleDescriptor);
     this.titleObserver?.disconnect();
+    this.faviconObserver?.disconnect();
   }
 }
 
